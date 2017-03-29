@@ -1,0 +1,18 @@
+#include "Communication.h"
+
+int main(){
+    Printer print;
+    std::cout<<print.attach(6)<<"\n";
+    print.connect();
+    while (1){
+        int stepper;
+        int steps;
+        std::cout << "Type the stepper\n";
+        std::cin >> stepper;
+        std::cout << stepper<<"Type the steps\n";
+        std::cin >> steps;
+         std::cout << steps;
+        print.turn(stepper, steps);
+    }
+    return 0;
+}

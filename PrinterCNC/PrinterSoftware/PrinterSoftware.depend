@@ -1,0 +1,65 @@
+# depslib dependency file v1.0
+1481835693 source:c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\nova pasta\printersoftware\serialclass.cpp
+	"SerialClass.h"
+
+1481835788 c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\nova pasta\printersoftware\serialclass.h
+	<windows.h>
+	<iostream>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1481924783 source:c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\nova pasta\printersoftware\communication.cpp
+	"Communication.h"
+
+1481918809 c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\nova pasta\printersoftware\communication.h
+	"SerialClass.h"
+	<tchar.h>
+	<time.h>
+
+1481926243 source:c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\nova pasta\printersoftware\printermain.cpp
+	"Communication.h"
+
+1482126523 source:c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\printersoftware\communication.cpp
+	"Communication.h"
+
+1482126523 c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\printersoftware\communication.h
+	"SerialClass.h"
+	<tchar.h>
+	<time.h>
+	<algorithm>
+
+1481835788 c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\printersoftware\serialclass.h
+	<windows.h>
+	<iostream>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1481835693 source:c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\printersoftware\serialclass.cpp
+	"SerialClass.h"
+
+1482121035 source:c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\printersoftware\printermain.cpp
+	"Communication.h"
+	<iostream>
+	<fstream>
+	<math.h>
+	<stack>
+	<Windows.h>
+	<string>
+	<stdlib.h>
+	<sstream>
+
+1482126523 source:c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\printersoftware\pathgenerator.cpp
+	"PathGenerator.h"
+
+1482126523 c:\users\aloysio\google drive\documentos\2ºsemestre-docs\ces-11l\exame projeto\printersoftware\pathgenerator.h
+	<fstream>
+	<math.h>
+	<stack>
+	<Windows.h>
+	<string>
+	<string.h>
+	<stdlib.h>
+	<sstream>
+

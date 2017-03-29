@@ -1,0 +1,28 @@
+#include "Communication.h"
+
+int main(){
+    Printer print;
+    bool attach = false;
+    for (int i = 0; i <= 50; ++i){
+        std::cout<<"Attaching to COM" << i <<"\n";
+        attach = print.attach(i);
+        if (!attach){
+            std::cout<<"Attach to COM" << i <<" succeded\n";
+            std::cout<<"Connecting to COM" << i <<"\n";
+            if (print.connect()){
+                std::cout<<"Connected to COM" << i <<"\n";
+                break;
+            }
+        }
+        attach = false;
+    }
+    while (1){
+        int stepper;
+        int steps;
+        std::cout << "down";
+        print.lower();
+        std::cout << "up";
+        print.raise();
+    }
+    return 0;
+}
