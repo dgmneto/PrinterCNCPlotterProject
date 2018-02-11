@@ -13,3 +13,5 @@ All the code for this part is under Arduino_printer folder.
 All the code for this part is under Printer_software folder.
 
 ->Image translator: this is a python script which translates a png file into a txt fie. This way, the logic software can generate the path.
+
+All the code for this part is under Image_translator folder.
