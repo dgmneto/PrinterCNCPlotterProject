@@ -89,6 +89,8 @@ StepperMotor mot1(1, 6, 5, 4, 2);
 
 StepperMotor mot2(1, 13, 8, 7, 14);
 
+StepperMotor mot3(1, 16, 15, 17, 18);
+
 void setup() {
   // Initializing serial communication with specified baud rate
   Serial.begin(115200);
@@ -104,8 +106,9 @@ void setup() {
   pinMode(yellowLed,OUTPUT);
   pinMode(redLed,OUTPUT);
 
-  analogWrite(pwmMot2,70);
-  analogWrite(pwmMot1,70);
+  analogWrite(pwmMot1,0);
+  analogWrite(pwmMot2,0);
+  analogWrite(pwmMot3,0);
   
 }
 
@@ -113,20 +116,55 @@ void setup() {
 bool connection = false;
 
 void loop() {
-
-  analogWrite(pwmMot1,0);
-  analogWrite(pwmMot2,0);
-  mot1.turn(-100);
-  analogWrite(pwmMot2,0);
-  analogWrite(pwmMot1,0);
   mot1.turn(100);
-
-  // put your main code here, to run repeatedly:
-  if (isConnected()) 
+  mot1.turn(-100);
+  digitalWrite(yellowLed, false);
+  if (isConnected()){
    connection = true;
+   digitalWrite(yellowLed, true);
+  }
   while (connection){
       byte request = readRequest();
       if (request > 0){
+            byte motor;
+            byte moveM;
+            bool directionD;
+            motor = request/32 - 4;
+            
+            directionD = ((request/16)|14) - 14;
+
+            moveM = ((request)|240) - 240;
+
+            switch(motor){
+            case 1:
+              analogWrite(pwmMot1,70);
+              analogWrite(pwmMot2,0);
+              analogWrite(pwmMot3,0);
+              mot1.turn(moveM*(2*directionD-1));
+              analogWrite(pwmMot1,0);
+              analogWrite(pwmMot2,0);
+              analogWrite(pwmMot3,0);
+              break;
+            case 2:
+              analogWrite(pwmMot1,0);
+              analogWrite(pwmMot2,50);
+              analogWrite(pwmMot3,0);
+              mot2.turn(moveM*(2*directionD-1));
+              analogWrite(pwmMot1,0);
+              analogWrite(pwmMot2,0);
+              analogWrite(pwmMot3,0);
+              break;
+            case 3:      
+              analogWrite(pwmMot1,0);
+              analogWrite(pwmMot2,0);
+              analogWrite(pwmMot3,70);
+              mot3.turn(moveM*(2*directionD-1));
+              analogWrite(pwmMot1,0);
+              analogWrite(pwmMot2,0);
+              analogWrite(pwmMot3,0);
+              break;
+          }
+          
           Serial.print((char)request);
       }
   }
@@ -136,9 +174,10 @@ void loop() {
 bool isConnected(){
     bool validation = false;
     char reading;
-    char key[8] = {'p','r','i','n','t','e','r','\0'};
+    char key[8] = {'p','r','i','n','t','e','r'};
     if (Serial.available() > 0){
-      for (int i = 0; i < 7; i++){
+      digitalWrite(redLed, true);
+      for (int i = 0; i < 8; i++){
          while (!(Serial.available() > 0))
          {}
          validation = true;
@@ -148,8 +187,10 @@ bool isConnected(){
             break;
          }
       }
+      Serial.flush();
       Serial.print(key);
     }
+    digitalWrite(redLed, false);
     return validation;
 }
 
@@ -171,8 +212,6 @@ void writeData(byte data1, byte data2){
   shiftOut(data, clk, MSBFIRST, data2);
   shiftOut(data, clk, MSBFIRST, data1);
   digitalWrite(latch, HIGH);
-  Serial.print(data1);
-  Serial.print(data2);
 }
 
 //Stepper static initializantion
