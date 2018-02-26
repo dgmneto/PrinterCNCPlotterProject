@@ -8,7 +8,7 @@ There are three main parts in this project the hardware and embedded software, t
 
 All the code for this part is under Arduino_printer folder.
 
-->Communication and logic software: it was developed in code blocks and running on windows serial reader library a code to interpret the messages which are sent by the Arduino. This code provides interface for the other layer of code (logic software) which generates the path for the printer and sends it to the communication. The path is generated based on a txt file which describes and image.
+->Communication and logic software: it was developed in code blocks and running on windows serial reader library a code to interpret the messages which are sent by the Arduino. This code provides interface for the other layer of code (logic software) which generates the path for the printer and sends it to the communication. The path is generated based on a txt file which describes an image.
 
 All the code for this part is under Printer_software folder.
 
