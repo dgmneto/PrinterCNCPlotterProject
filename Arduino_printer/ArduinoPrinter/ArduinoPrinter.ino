@@ -147,7 +147,7 @@ int motorXCommand = 0;
 int motorYCommand = 0;
 int motorZCommand = 0;
 int motorXSpeedLoop = 0;
-int motorXDelay = 10;
+int motorXDelay = 2;
 
 void setup() {
   //Initializing stepper pins
@@ -203,7 +203,8 @@ void loop() {
 //Serial event handling
 void serialEvent() {
   while (Serial.available()){
-      int a = Serial.parseInt();
+      char a = Serial.read();
+      Serial.print(a);
       motorXCommand = a;
     }
 }
