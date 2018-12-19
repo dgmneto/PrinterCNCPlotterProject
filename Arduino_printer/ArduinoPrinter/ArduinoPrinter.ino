@@ -147,7 +147,7 @@ int motorXCommand = 0;
 int motorYCommand = 0;
 int motorZCommand = 0;
 int motorXSpeedLoop = 0;
-int motorXDelay = 2;
+int motorXDelay = 0;
 
 void setup() {
   //Initializing stepper pins
@@ -204,7 +204,6 @@ void loop() {
 void serialEvent() {
   while (Serial.available()){
       char a = Serial.read();
-      Serial.print(a);
       motorXCommand = a;
     }
 }
@@ -217,6 +216,9 @@ ISR(TIMER1_COMPA_vect){
       motorXCurrentStep = (motorXCurrentStep + 1)%8;
       if (motorXCurrentStep%2 == 0){
         motorXCommand--;
+        if (motorXCommand == 0){
+          Serial.print((char)5);
+        }
      }
      motorXSpeedLoop = motorXDelay;
     }
@@ -230,6 +232,9 @@ ISR(TIMER1_COMPA_vect){
       motorXCurrentStep = (motorXCurrentStep - 1)%8;
       if (motorXCurrentStep%2 == 0){
         motorXCommand++;
+        if (motorXCommand == 0){
+          Serial.print((char)5);
+        }
       }
       motorXSpeedLoop = motorXDelay;
     }

@@ -16,26 +16,33 @@ public class SerialTest {
         InputStream in = port.getInputStream();
         byte[] arr1 = {100};
         byte[] arr2 = {-100};
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        port.writeBytes(arr1, 1);
+        boolean spin = false;
         while (true) {
             try {
-                Thread.sleep(8000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            port.writeBytes(arr1, 1);
-            try {
-                System.out.println((int)in.read());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                Thread.sleep(8000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            port.writeBytes(arr2, 1);
-            try {
-                System.out.println((int)in.read());
+                byte [] arr = new byte[1];
+                if (in.available() > 0){
+                    in.read(arr);
+                }
+                if (arr[0] == 5){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (spin){
+                        port.writeBytes(arr1, 1);
+                    }
+                    else {
+                        port.writeBytes(arr2, 1);
+                    }
+                    spin = !spin;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
