@@ -202,9 +202,18 @@ void loop() {
 
 //Serial event handling
 void serialEvent() {
-  while (Serial.available()){
-      char a = Serial.read();
-      motorXCommand = a;
+  while (Serial.available() > 1){
+      String serialRead = Serial.readString();
+      bool connectionAttempt = true;
+      for (int i = 0; i < 6; ++i){
+        if ((char)serialRead[i] != -128){
+          connectionAttempt = false;
+        }
+      }
+      if (connectionAttempt){
+        Serial.print((char)1);
+        ledBlinkRoutine();
+      }
     }
 }
 
@@ -257,4 +266,23 @@ void writeData(byte data1, byte data2){
   shiftOut(data, clk, LSBFIRST, data2);
   shiftOut(data, clk, LSBFIRST, data1);
   digitalWrite(latch, HIGH);
+}
+
+void ledBlinkRoutine(){
+  digitalWrite(ledBlue,HIGH);
+  delay(50);
+  digitalWrite(ledBlue,LOW);
+  digitalWrite(ledYellow,HIGH);
+  delay(50);
+  digitalWrite(ledYellow,LOW);
+  digitalWrite(ledRed,HIGH);
+  delay(50);
+  digitalWrite(ledRed,LOW);
+  delay(50);
+  digitalWrite(ledYellow,HIGH);
+  delay(50);
+  digitalWrite(ledYellow,LOW);
+  digitalWrite(ledBlue,HIGH);
+  delay(50);
+  digitalWrite(ledBlue,LOW);
 }
