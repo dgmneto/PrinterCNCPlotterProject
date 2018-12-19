@@ -6,12 +6,13 @@
 const int data = 6;
 const int latch = 2;
 const int clk = 3;
-const int en1 = 9;
+const int enX = 9;
 const int en2 = 10;
 const int en3 = 11;
 const int ledBlue = 4;
 const int ledYellow = 5;
 const int ledRed = 12;
+const int baudRate = 115200;
 
 struct StepperData {
   byte data1 = 0;
@@ -142,18 +143,18 @@ StepperData motorZSteps(byte id){
 byte motorXCurrentStep = 0;
 byte motorYCurrentStep = 0;
 byte motorZCurrentStep = 0;
-byte motorXState = 0;
-byte motorYState = 0;
-byte motorZState = 0;
-bool test = true;
-byte counter = 0;
+int motorXCommand = 0;
+int motorYCommand = 0;
+int motorZCommand = 0;
+int motorXSpeedLoop = 0;
+int motorXDelay = 10;
 
 void setup() {
   //Initializing stepper pins
   pinMode(data,OUTPUT);
   pinMode(latch,OUTPUT);
   pinMode(clk,OUTPUT);
-  pinMode(en1,OUTPUT);
+  pinMode(enX,OUTPUT);
   pinMode(en2,OUTPUT);
   pinMode(en3,OUTPUT);
 
@@ -161,6 +162,9 @@ void setup() {
   pinMode(ledBlue,OUTPUT);
   pinMode(ledYellow,OUTPUT);
   pinMode(ledRed,OUTPUT);
+
+  //Initializing serial
+  Serial.begin(115200);
 
   //Blinking all leds (initialization)
   digitalWrite(ledRed,HIGH);
@@ -194,33 +198,51 @@ sei();//allow interrupts
 }
 
 void loop() {
-  digitalWrite(en1,HIGH);
-    digitalWrite(en2,HIGH);
-    digitalWrite(en3,HIGH);
-//  for (int i = 0; i < 4; ++i){
-//  cycle4StepsCounterClockwise(2);
-//  }
-//    test= true;
-//    delay(5000);
-//    test = false;
-//    delay(5000);
+}
+
+//Serial event handling
+void serialEvent() {
+  while (Serial.available()){
+      int a = Serial.parseInt();
+      motorXCommand = a;
+    }
 }
 
 //Interrupt to move the steppers
 ISR(TIMER1_COMPA_vect){
-  if (test){
-  motorXCurrentStep = (motorXCurrentStep + 1)%8;}
-  else{
-  motorXCurrentStep = (motorXCurrentStep - 1)%8;}
-  counter++;
-  if (counter == 100){
-    counter = 0;
-    test = !test;
+  if (motorXCommand > 0){
+    digitalWrite(enX,HIGH);
+    if (motorXSpeedLoop <= 0){
+      motorXCurrentStep = (motorXCurrentStep + 1)%8;
+      if (motorXCurrentStep%2 == 0){
+        motorXCommand--;
+     }
+     motorXSpeedLoop = motorXDelay;
     }
+    else {
+      motorXSpeedLoop--;
+    }
+  }
+  else if (motorXCommand < 0){
+    digitalWrite(enX,HIGH);
+    if (motorXSpeedLoop <= 0){
+      motorXCurrentStep = (motorXCurrentStep - 1)%8;
+      if (motorXCurrentStep%2 == 0){
+        motorXCommand++;
+      }
+      motorXSpeedLoop = motorXDelay;
+    }
+    else {
+      motorXSpeedLoop--;
+    }
+  }
+  else {
+    digitalWrite(enX,LOW);
+  }
   StepperData toSend;
-  StepperData data1 = motorXSteps(motorXCurrentStep);
-  toSend.data1 = data1.data1;
-  toSend.data2 = data1.data2;
+  StepperData dataX = motorXSteps(motorXCurrentStep);
+  toSend.data1 = dataX.data1;
+  toSend.data2 = dataX.data2;
   writeData(toSend.data1, toSend.data2);
 }
 
@@ -229,18 +251,4 @@ void writeData(byte data1, byte data2){
   shiftOut(data, clk, LSBFIRST, data2);
   shiftOut(data, clk, LSBFIRST, data1);
   digitalWrite(latch, HIGH);
-}
-
-void cycle4StepsCounterClockwise(int sleep){
-  for (int i = 7; i >= 0; --i){
-    StepperData data1 = motorZSteps(i);
-    StepperData data2 = motorXSteps(i);
-    StepperData data3 = motorYSteps(i);
-    StepperData toSend;
-    toSend.data1 = data1.data1 | data2.data1 | data3.data1;
-    toSend.data2 = data1.data2 | data2.data2 | data3.data2;
-//    if (i%2 == 0)
-    writeData(toSend.data1, toSend.data2);
-    delay(sleep);
-  }
 }
