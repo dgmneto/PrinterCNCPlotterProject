@@ -8,7 +8,7 @@ const int latch = 2;
 const int clk = 3;
 const int enX = 9;
 const int enY = 11;
-const int en3 = 10;
+const int enZ = 10;
 const int ledBlue = 4;
 const int ledYellow = 5;
 const int ledRed = 12;
@@ -163,7 +163,7 @@ void setup() {
   pinMode(clk, OUTPUT);
   pinMode(enX, OUTPUT);
   pinMode(enY, OUTPUT);
-  pinMode(en3, OUTPUT);
+  pinMode(enZ, OUTPUT);
 
   //Setting up led pins
   pinMode(ledBlue, OUTPUT);
@@ -172,7 +172,7 @@ void setup() {
 
   //Initializing serial
   Serial.begin(115200);
-  Serial.setTimeout(5);
+  Serial.setTimeout(10);
 
   //Blinking all leds (initialization)
   digitalWrite(ledRed, HIGH);
@@ -236,7 +236,14 @@ void serialEvent() {
         if ((serialRead[3] >> 1) % 2){
           motorYCommand *= -1;
         }
-//        motorYDelay = (byte)(serialRead[3] >> 2);/
+        motorYDelay = (byte)(serialRead[3] >> 2);
+
+        //Motor Z
+        motorZCommand = ((byte)serialRead[4])+(serialRead[5]%2)*256;
+        if ((serialRead[5] >> 1) % 2){
+          motorZCommand *= -1;
+        }
+        motorZDelay = (byte)(serialRead[5] >> 2);
       }
     }
   }
@@ -314,17 +321,55 @@ ISR(TIMER1_COMPA_vect) {
   else {
     digitalWrite(enY, LOW);
   }
+  if (motorZCommand > 0) {
+    digitalWrite(enZ, HIGH);
+    if (motorZSpeedLoop <= 0) {
+      motorZCurrentStep = (motorZCurrentStep + 1) % 8;
+      if (motorZCurrentStep % 2 == 0) {
+        motorZCommand--;
+        if (motorZCommand == 0) {
+          overSignalZ = true;
+        }
+      }
+      motorZSpeedLoop = motorZDelay;
+    }
+    else {
+      motorZSpeedLoop--;
+    }
+  }
+  else if (motorZCommand < 0) {
+    digitalWrite(enZ, HIGH);
+    if (motorZSpeedLoop <= 0) {
+      motorZCurrentStep = (motorZCurrentStep - 1) % 8;
+      if (motorZCurrentStep % 2 == 0) {
+        motorZCommand++;
+        if (motorZCommand == 0) {
+          overSignalZ = true;
+        }
+      }
+      motorZSpeedLoop = motorZDelay;
+    }
+    else {
+      motorZSpeedLoop--;
+    }
+  }
+  else {
+    digitalWrite(enZ, LOW);
+  }
   StepperData toSend;
   StepperData dataX = motorXSteps(motorXCurrentStep);
   StepperData dataY = motorYSteps(motorYCurrentStep);
-  toSend.data1 = dataX.data1 | dataY.data1;
-  toSend.data2 = dataX.data2 | dataY.data2;
+  StepperData dataZ = motorZSteps(motorZCurrentStep);
+  toSend.data1 = dataX.data1 | dataY.data1 | dataZ.data1;
+  toSend.data2 = dataX.data2 | dataY.data2 | dataZ.data2;
   writeData(toSend.data1, toSend.data2);
-  if ((overSignalX && (overSignalY || motorYCommand == 0)) || 
-  (overSignalY && (overSignalX || motorXCommand == 0))){
+  if ((overSignalX && (overSignalY || motorYCommand == 0) && (overSignalZ || motorZCommand == 0)) || 
+  (overSignalY && (overSignalX || motorXCommand == 0) && (overSignalZ || motorZCommand == 0)) ||
+  (overSignalZ && (overSignalX || motorXCommand == 0) && (overSignalY || motorYCommand == 0))){
     Serial.print((char)5);
     overSignalX = false;
     overSignalY = false;
+    overSignalZ = false;
   }
 }
 
