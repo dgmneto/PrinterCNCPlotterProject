@@ -7,8 +7,8 @@ const int data = 6;
 const int latch = 2;
 const int clk = 3;
 const int enX = 9;
-const int en2 = 10;
-const int en3 = 11;
+const int enY = 11;
+const int en3 = 10;
 const int ledBlue = 4;
 const int ledYellow = 5;
 const int ledRed = 12;
@@ -147,8 +147,14 @@ int motorXCommand = 0;
 int motorYCommand = 0;
 int motorZCommand = 0;
 int motorXSpeedLoop = 0;
+int motorYSpeedLoop = 0;
+int motorZSpeedLoop = 0;
 int motorXDelay = 0;
+int motorYDelay = 0;
+int motorZDelay = 0;
 bool overSignalX = false;
+bool overSignalY = false;
+bool overSignalZ = false;
 
 void setup() {
   //Initializing stepper pins
@@ -156,7 +162,7 @@ void setup() {
   pinMode(latch, OUTPUT);
   pinMode(clk, OUTPUT);
   pinMode(enX, OUTPUT);
-  pinMode(en2, OUTPUT);
+  pinMode(enY, OUTPUT);
   pinMode(en3, OUTPUT);
 
   //Setting up led pins
@@ -218,11 +224,19 @@ void serialEvent() {
         ledBlinkRoutine();
       }
       else {
+        //Motor X
         motorXCommand = ((byte)serialRead[0])+(serialRead[1]%2)*256;
         if ((serialRead[1] >> 1) % 2){
           motorXCommand *= -1;
         }
         motorXDelay = (byte)(serialRead[1] >> 2);
+
+        //Motor Y
+        motorYCommand = ((byte)serialRead[2])+(serialRead[3]%2)*256;
+        if ((serialRead[3] >> 1) % 2){
+          motorYCommand *= -1;
+        }
+//        motorYDelay = (byte)(serialRead[3] >> 2);/
       }
     }
   }
@@ -237,7 +251,7 @@ ISR(TIMER1_COMPA_vect) {
       if (motorXCurrentStep % 2 == 0) {
         motorXCommand--;
         if (motorXCommand == 0) {
-          Serial.print((char)5);
+          overSignalX = true;
         }
       }
       motorXSpeedLoop = motorXDelay;
@@ -253,7 +267,6 @@ ISR(TIMER1_COMPA_vect) {
       if (motorXCurrentStep % 2 == 0) {
         motorXCommand++;
         if (motorXCommand == 0) {
-          Serial.print((char)5);
           overSignalX = true;
         }
       }
@@ -266,15 +279,53 @@ ISR(TIMER1_COMPA_vect) {
   else {
     digitalWrite(enX, LOW);
   }
+  if (motorYCommand > 0) {
+    digitalWrite(enY, HIGH);
+    if (motorYSpeedLoop <= 0) {
+      motorYCurrentStep = (motorYCurrentStep + 1) % 8;
+      if (motorYCurrentStep % 2 == 0) {
+        motorYCommand--;
+        if (motorYCommand == 0) {
+          overSignalY = true;
+        }
+      }
+      motorYSpeedLoop = motorYDelay;
+    }
+    else {
+      motorYSpeedLoop--;
+    }
+  }
+  else if (motorYCommand < 0) {
+    digitalWrite(enY, HIGH);
+    if (motorYSpeedLoop <= 0) {
+      motorYCurrentStep = (motorYCurrentStep - 1) % 8;
+      if (motorYCurrentStep % 2 == 0) {
+        motorYCommand++;
+        if (motorYCommand == 0) {
+          overSignalY = true;
+        }
+      }
+      motorYSpeedLoop = motorYDelay;
+    }
+    else {
+      motorYSpeedLoop--;
+    }
+  }
+  else {
+    digitalWrite(enY, LOW);
+  }
   StepperData toSend;
   StepperData dataX = motorXSteps(motorXCurrentStep);
-  toSend.data1 = dataX.data1;
-  toSend.data2 = dataX.data2;
+  StepperData dataY = motorYSteps(motorYCurrentStep);
+  toSend.data1 = dataX.data1 | dataY.data1;
+  toSend.data2 = dataX.data2 | dataY.data2;
   writeData(toSend.data1, toSend.data2);
-//  if (overSignalX){
-//    Serial.print((char)5);
-//    overSignalX = false;
-//  }
+  if ((overSignalX && (overSignalY || motorYCommand == 0)) || 
+  (overSignalY && (overSignalX || motorXCommand == 0))){
+    Serial.print((char)5);
+    overSignalX = false;
+    overSignalY = false;
+  }
 }
 
 void writeData(byte data1, byte data2) {

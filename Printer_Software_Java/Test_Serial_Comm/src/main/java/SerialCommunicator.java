@@ -10,7 +10,7 @@ public class SerialCommunicator {
     private int baudRate;
     private int newReadTimeout;
     private int newWriteTimeout;
-    private int waitTimeForbegin = 1000;
+    private int waitTimeForbegin = 2000;
     private int waitTimeForConnect = 100;
     private byte[] connectionAccquiredMessage = {-128, -128, -128, -128, -128, -128};
 
