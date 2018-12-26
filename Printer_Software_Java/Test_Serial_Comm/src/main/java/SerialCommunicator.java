@@ -10,6 +10,8 @@ public class SerialCommunicator {
     private int baudRate;
     private int newReadTimeout;
     private int newWriteTimeout;
+    private int waitTimeForbegin = 1000;
+    private int waitTimeForConnect = 100;
     private byte[] connectionAccquiredMessage = {-128, -128, -128, -128, -128, -128};
 
     public SerialCommunicator(){
@@ -55,7 +57,7 @@ public class SerialCommunicator {
             connectToPort(i);
             printerPort.openPort();
             try {
-                Thread.sleep(5000);
+                Thread.sleep(waitTimeForbegin);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -83,6 +85,11 @@ public class SerialCommunicator {
                 if (response[0] == 1) {
                     System.out.println("Connected to port: " + printerPort.getSystemPortName());
                     isConnected = true;
+                    try {
+                        Thread.sleep(waitTimeForConnect);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     return 0;
                 }
             }
@@ -113,5 +120,23 @@ public class SerialCommunicator {
 
         //Writing data to the serial port
         printerPort.writeBytes(data, connectionAccquiredMessage.length);
+    }
+
+    public int available(){
+        try {
+            return printerPort.getInputStream().available();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int read(byte[] readArray){
+        try {
+            return printerPort.getInputStream().read(readArray);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

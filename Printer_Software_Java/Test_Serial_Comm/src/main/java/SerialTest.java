@@ -4,13 +4,41 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class SerialTest {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         SerialCommunicator communicator = new SerialCommunicator();
-        communicator.autoconnect(5);
+        communicator.autoconnect(20);
 
-        //Loop for backwards and forward
+        //Loop for backwards and forward in the X axis
+        byte[] forward = {(byte) 255, (byte) 0b00000000, 0, 0, 0, 0, 0, 0, 0};
+        byte[] backward = {(byte) 255, (byte) 0b00000010, 0, 0, 0, 0, 0, 0, 0};
 
-//        SerialPort port = SerialPort.getCommPorts()[0];
+        System.out.println("Writting data");
+
+        communicator.writeData(forward);
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        boolean spin = false;
+
+        while (true) {
+            byte[] arr = new byte[1];
+            if (communicator.available() > 0) {
+                communicator.read(arr);
+            }
+            if (arr[0] == 5) {
+                if (spin) {
+                    communicator.writeData(forward);
+                } else {
+                    communicator.writeData(backward);
+                }
+                spin = !spin;
+            }
+        }
+        //        SerialPort port = SerialPort.getCommPorts()[0];
 //        port.setBaudRate(115200);
 //        port.openPort();
 //        port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
@@ -24,29 +52,5 @@ public class SerialTest {
 //        }
 //        port.writeBytes(arr1, 1);
 //        boolean spin = false;
-//        while (true) {
-//            try {
-//                byte [] arr = new byte[1];
-//                if (in.available() > 0){
-//                    in.read(arr);
-//                }
-//                if (arr[0] == 5){
-//                    try {
-//                        Thread.sleep(100);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                    if (spin){
-//                        port.writeBytes(arr1, 1);
-//                    }
-//                    else {
-//                        port.writeBytes(arr2, 1);
-//                    }
-//                    spin = !spin;
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
     }
 }
