@@ -8,6 +8,7 @@ public class SerialTest {
         SerialCommunicator communicator = new SerialCommunicator();
         communicator.autoconnect(5);
 
+        //Loop for backwards and forward
 
 //        SerialPort port = SerialPort.getCommPorts()[0];
 //        port.setBaudRate(115200);

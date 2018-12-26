@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class SerialCommunicator {
     private SerialPort printerPort;
+    private boolean isConnected = false;
     private int baudRate;
     private int newReadTimeout;
     private int newWriteTimeout;
@@ -81,6 +82,7 @@ public class SerialCommunicator {
                 //Checking if the response is correct
                 if (response[0] == 1) {
                     System.out.println("Connected to port: " + printerPort.getSystemPortName());
+                    isConnected = true;
                     return 0;
                 }
             }
@@ -88,5 +90,28 @@ public class SerialCommunicator {
         }
         System.out.println("Failed to autoconnect");
         return 1;
+    }
+
+    public void disconnect(){
+        if (isConnected){
+            printerPort.closePort();
+            isConnected = false;
+        }
+        else {
+            System.out.println("Already not connected");
+        }
+    }
+
+    public void writeData(byte[] data){
+        if (!isConnected){
+            System.out.println("Not connected");
+            return;
+        }
+
+        //Checking the data length
+        assert data.length == connectionAccquiredMessage.length;
+
+        //Writing data to the serial port
+        printerPort.writeBytes(data, connectionAccquiredMessage.length);
     }
 }
